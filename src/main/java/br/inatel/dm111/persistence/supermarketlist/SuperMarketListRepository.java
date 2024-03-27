@@ -8,9 +8,9 @@ public interface SuperMarketListRepository {
 
     void save(SuperMarketList superMarketList);
 
-    List<SuperMarketList> findAll() throws ExecutionException, InterruptedException;
+    List<SuperMarketList> findAllByUserId(String userId) throws ExecutionException, InterruptedException;
 
-    Optional<SuperMarketList> findById(String id) throws ExecutionException, InterruptedException;
+    Optional<SuperMarketList> findByUserIdAndId(String userId, String id) throws ExecutionException, InterruptedException;
 
     void delete(String id) throws ExecutionException, InterruptedException;
 

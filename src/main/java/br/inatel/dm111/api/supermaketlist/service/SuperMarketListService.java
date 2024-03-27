@@ -3,10 +3,10 @@ package br.inatel.dm111.api.supermaketlist.service;
 import br.inatel.dm111.api.core.ApiException;
 import br.inatel.dm111.api.core.AppErrorCode;
 import br.inatel.dm111.api.supermaketlist.SuperMarketListRequest;
-import br.inatel.dm111.persistence.product.Product;
 import br.inatel.dm111.persistence.product.ProductRepository;
 import br.inatel.dm111.persistence.supermarketlist.SuperMarketList;
 import br.inatel.dm111.persistence.supermarketlist.SuperMarketListRepository;
+import br.inatel.dm111.persistence.user.UserFirebaseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,27 +22,30 @@ public class SuperMarketListService {
 
     private final SuperMarketListRepository splRepository;
     private final ProductRepository productRepository;
+    private final UserFirebaseRepository userRepository;
 
-    public SuperMarketListService(SuperMarketListRepository splRepository, ProductRepository productRepository) {
+    public SuperMarketListService(SuperMarketListRepository splRepository, ProductRepository productRepository, UserFirebaseRepository userRepository) {
         this.splRepository = splRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
-    public List<SuperMarketList> searchAllLists() throws ApiException {
+    public List<SuperMarketList> searchAllLists(String userId) throws ApiException {
         try {
-            return splRepository.findAll();
+            return splRepository.findAllByUserId(userId);
         } catch (ExecutionException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new ApiException(AppErrorCode.SUPERMARKET_LIST_QUERY_ERROR);
         }
     }
 
-    public SuperMarketList searchById(String id) throws ApiException {
-        return retrieveSuperMarketList(id);
+    public SuperMarketList searchById(String userId, String id) throws ApiException {
+        return retrieveSuperMarketList(userId, id);
     }
 
-    public SuperMarketList createList(SuperMarketListRequest request) throws ApiException {
-        var list = buildSuperMarketList(request);
+    public SuperMarketList createList(String userId, SuperMarketListRequest request) throws ApiException {
+        validateUser(userId);
+        var list = buildSuperMarketList(userId, request);
 
         var allProductsAvailable = true;
         for (String id: list.getProducts()) {
@@ -64,10 +67,24 @@ public class SuperMarketListService {
         }
     }
 
-    public SuperMarketList updateList(String id, SuperMarketListRequest request) throws ApiException {
-        var list = retrieveSuperMarketList(id);
+    private void validateUser(String userId) throws ApiException {
+        try {
+            userRepository.findById(userId)
+                    .orElseThrow(() -> new ApiException(AppErrorCode.USER_NOT_FOUND));
+        } catch (ExecutionException | InterruptedException e) {
+            throw new ApiException(AppErrorCode.USERS_QUERY_ERROR);
+        }
+    }
+
+    public SuperMarketList updateList(String userId, String id, SuperMarketListRequest request) throws ApiException {
+        validateUser(userId);
+        var list = retrieveSuperMarketList(userId, id);
         list.setName(request.name());
         list.setProducts(request.products());
+
+        if (!list.getUserId().equals(userId)) {
+            throw new ApiException(AppErrorCode.SUPERMARKET_LIST_OPERATION_NOT_ALLOWED);
+        }
 
         var allProductsAvailable = true;
         for (String productId: list.getProducts()) {
@@ -90,9 +107,9 @@ public class SuperMarketListService {
 
     }
 
-    public void removeList(String id) throws ApiException {
+    public void removeList(String userId, String id) throws ApiException {
         try {
-            var splOpt = splRepository.findById(id);
+            var splOpt = splRepository.findByUserIdAndId(userId, id);
             if (splOpt.isPresent()) {
                 var spl = splOpt.get();
                 splRepository.delete(spl.getId());
@@ -102,14 +119,14 @@ public class SuperMarketListService {
         }
     }
 
-    private SuperMarketList buildSuperMarketList(SuperMarketListRequest request) {
+    private SuperMarketList buildSuperMarketList(String userId, SuperMarketListRequest request) {
         var id = UUID.randomUUID().toString();
-        return new SuperMarketList(id, request.name(), request.products());
+        return new SuperMarketList(id, request.name(), userId, request.products());
     }
 
-    private SuperMarketList retrieveSuperMarketList(String id) throws ApiException {
+    private SuperMarketList retrieveSuperMarketList(String userId, String id) throws ApiException {
         try {
-            return splRepository.findById(id)
+            return splRepository.findByUserIdAndId(userId, id)
                     .orElseThrow(() -> new ApiException(AppErrorCode.SUPERMARKET_LIST_NOT_FOUND));
         } catch (ExecutionException | InterruptedException e) {
             throw new ApiException(AppErrorCode.SUPERMARKET_LIST_QUERY_ERROR);

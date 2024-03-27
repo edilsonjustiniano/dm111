@@ -18,14 +18,17 @@ public class SuperMarketListMemoryRepository implements SuperMarketListRepositor
     }
 
     @Override
-    public List<SuperMarketList> findAll() {
-        return db.stream().toList();
+    public List<SuperMarketList> findAllByUserId(String userId) {
+        return db.stream()
+                .filter(spl -> spl.getUserId().equals(userId))
+                .toList();
     }
 
     @Override
-    public Optional<SuperMarketList> findById(String id) {
+    public Optional<SuperMarketList> findByUserIdAndId(String userId, String id) {
         return db.stream()
                 .filter(spl -> spl.getId().equals(id))
+                .filter(spl -> spl.getUserId().equals(userId))
                 .findFirst();
     }
 

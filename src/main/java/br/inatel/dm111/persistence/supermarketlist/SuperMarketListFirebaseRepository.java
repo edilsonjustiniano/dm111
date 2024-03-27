@@ -26,25 +26,30 @@ public class SuperMarketListFirebaseRepository implements SuperMarketListReposit
     }
 
     @Override
-    public List<SuperMarketList> findAll() throws ExecutionException, InterruptedException {
+    public List<SuperMarketList> findAllByUserId(String userId) throws ExecutionException, InterruptedException {
         return firestore.collection(COLLECTION_NAME)
                 .get()
                 .get()
                 .getDocuments()
                 .parallelStream()
                 .map(spl -> spl.toObject(SuperMarketList.class))
+                .filter(spl -> spl.getUserId().equals(userId))
                 .toList();
     }
 
     @Override
-    public Optional<SuperMarketList> findById(String id) throws ExecutionException, InterruptedException {
+    public Optional<SuperMarketList> findByUserIdAndId(String userId, String id) throws ExecutionException, InterruptedException {
         var spl = firestore.collection(COLLECTION_NAME)
                 .document(id)
                 .get()
                 .get()
                 .toObject(SuperMarketList.class);
 
-        return Optional.ofNullable(spl);
+        if (spl.getUserId().equals(userId)) {
+            return Optional.ofNullable(spl);
+        }
+
+        return Optional.empty();
     }
 
     @Override

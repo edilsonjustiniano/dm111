@@ -5,14 +5,13 @@ import br.inatel.dm111.api.user.UserResponse;
 import br.inatel.dm111.api.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//http://localhost:8080/dm111/users/{userId}
 @RestController
+@RequestMapping("/dm111")
 public class UserController {
 
     private final UserService service;
@@ -27,10 +26,28 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable("id") String id) throws ApiException {
+        var user = service.searchUser(id);
+        return ResponseEntity.ok(user);
+    }
+
     @PostMapping("/users")
-    public ResponseEntity<UserResponse> postUser(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> postUser(@RequestBody UserRequest request) throws ApiException {
         var user = service.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
+    @PutMapping("/users/{id}")
+    public ResponseEntity<UserResponse> putUser(@PathVariable("id") String id,
+                                                @RequestBody UserRequest request) throws ApiException {
+        var user = service.updateUser(id, request);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable("id") String id) throws ApiException {
+        service.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
 }

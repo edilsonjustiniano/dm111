@@ -5,7 +5,7 @@ package br.inatel.dm111.persistence.user;
 //    "name": "",
 //    "email": "",
 //    "password": "",
-//    "role": "ADMIN|USER"
+//    "role": "ADMIN|CLIENT"
 //}
 public class User {
 

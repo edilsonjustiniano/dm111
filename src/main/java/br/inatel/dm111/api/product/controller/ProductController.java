@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//http://localhost:8080/dm111/products
 @RestController
+@RequestMapping("/dm111")
 public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
