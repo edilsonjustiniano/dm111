@@ -4,9 +4,12 @@ import br.inatel.dm111.api.core.ApiException;
 import br.inatel.dm111.api.core.AppErrorCode;
 import br.inatel.dm111.api.core.PasswordCrypto;
 import br.inatel.dm111.api.user.UserResponse;
+import br.inatel.dm111.api.user.controller.UserController;
 import br.inatel.dm111.api.user.controller.UserRequest;
 import br.inatel.dm111.persistence.user.User;
 import br.inatel.dm111.persistence.user.UserFirebaseRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -20,6 +23,8 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
     private final PasswordCrypto crypto;
     private final FirebaseCloudMessagePublisher publisher;
     private final UserFirebaseRepository repository;
@@ -31,6 +36,7 @@ public class UserService {
     }
 
     public List<UserResponse> searchUsers() throws ApiException {
+        log.info("Searching the info from all users.");
         try {
             return repository.findAll().stream()
                     .map(this::toUserResponse)
@@ -41,6 +47,8 @@ public class UserService {
     }
 
     public UserResponse searchUser(String id) throws ApiException {
+        log.info("Searching the info of the user: {}.", id);
+
         try {
             return repository.findById(id)
                             .map(this::toUserResponse)
