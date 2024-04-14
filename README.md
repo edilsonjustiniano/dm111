@@ -105,3 +105,11 @@ gcloud app deploy --version 1 dm111/app.yaml
 
 Some data/confirmation will be requested via terminal at the end of this step and as result of the deploy the link to access
 the service via API will be there.
+
+### Deploy multiple services at once
+
+To deploy both services simultaneously, please run the following command:
+
+```
+gcloud app deploy --version 1 dm111/app.yaml dm111-promo/app.yaml
+```
