@@ -1,5 +1,13 @@
 # DM111
 
+## Project
+
+The project was split in two repositories, the [current one](https://github.com/edilsonjustiniano/dm111) (a.k.a DM111) 
+and the [DM111 Promo](https://github.com/edilsonjustiniano/dm111-promo) that will listen some notifications published
+by DM111 and apply some business logic based on the published/consumed events.
+
+## Overview 
+
 This repository contains the solution implemented by the DM111 discipline from the Pos Graduation course Mobile and 
 Cloud Development by Inatel.
 
